@@ -7,16 +7,33 @@
     
   <link rel="stylesheet" href="style.css">
 
+  <link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.9.2/css/flag-icons.min.css"
+  />
+
 </head>
 <body>
 
 
   <div class="container">
+
     <div class="heading">Quiz App</div>
+
+
+    <details class="language-selection" id="language-selection">
+      <summary style="cursor:pointer;">Language</summary>
+
+      <span onclick="translatePage('en')"><span class="fi fi-gb"></span> English</span>
+      <span onclick="translatePage('tr')"><span class="fi fi-tr"></span> Turkish</span>
+      <span onclick="translatePage('de')"><span class="fi fi-de"></span> German</span>
+    </details>
+
+
 
     <div id="start-container">
       <p class="quiz-app-description">
-        Welcome to my multilingual quiz app. Test your knowledge in various languages!
+        Welcome to my multilingual quiz app. Select your language and test your knowledge!
       </p>
 
       <button onclick="loadQuestions()" type="button" class="button button-secondary">Start Game</button>
@@ -49,6 +66,10 @@
       </p>
 
       <div id="progressbar" aria-valuemin="0" aria-valuemax="100" style="--value:10"></div>
+      <details class="progress-details" id="progress-details">
+        <summary style="cursor:pointer">View Details</summary>
+        <!-- here are the details injected with js -->
+      </details>
 
       <button onclick="location.reload()" type="button" class="button button-secondary">Play Again</button>
 
@@ -62,9 +83,14 @@
 
 
   <script>
+
+      categories = [27, 10, 15];
+
+
       points = 0;
       currentQuestion = -1;
       questionsAmount = 10;
+      userAnswers = [];
       questions = [];
 
   function goToNextQuestion(){
@@ -95,7 +121,39 @@
   function showResult(){
     document.getElementById("question-container").style.display = "none";
     document.getElementById("result-container").style.display = "block";
+    //document.getElementById("language-selection").style.display = "flex";
+
     document.getElementById("progressbar").style=`--value:${(points/questionsAmount)*100}`;
+
+    progressDetailsHtml = "";
+
+    progressDetailsHtml += `<br><span style="color:#009933">&#10004; Correct: ${points}/${questionsAmount}</span><br>`;
+    progressDetailsHtml += `<span style="color:red">&#10006; Wrong: ${questionsAmount - points}/${questionsAmount}</span><br><br>`;
+
+
+    for(var i = 0, length = questions.length; i < length; i++){
+        questionToAdd = questions[i]
+        questionText = questionToAdd["question"];
+        questionCorrectAnswer = questionToAdd["correct_answer"];
+        questionUserAnswer = userAnswers[i];
+        answerColor = "";
+
+        if(questionCorrectAnswer === questionUserAnswer){
+          answerColor = "#009933";
+        }
+        else{
+          answerColor = "red";
+        }
+
+        progressDetailsHtml += `
+          <span>
+          <strong>Question ${i +1}:</strong> ${questionText}<br>
+          You answered: <span style="color:${answerColor}"><strong>${questionUserAnswer}</strong></span><br>
+          The correct answer was: <strong>${questionCorrectAnswer}</strong><br><br>
+          </span>`;
+    }
+
+    document.getElementById("progress-details").innerHTML += progressDetailsHtml;
   }
 
 
@@ -107,6 +165,8 @@
     else{
       document.getElementById("points-count").style.color="red";
     }
+
+    userAnswers.push(userAnswer);
 
     document.getElementById("points-count").innerText = points;
     startShakeAnimation();
@@ -155,6 +215,8 @@
           questions = data["results"];
 
           document.getElementById("start-container").style.display = "none";
+          document.getElementById("language-selection").style.display = "none";
+
           document.getElementById("question-container").style.display = "block";
           goToNextQuestion();
 
@@ -192,9 +254,35 @@
   function showLoadAgain(){
       document.getElementById("start-container").innerHTML += `<i style="color:red;">Error. Couldn't load data. Try again in a moment.</i><br>`;
   }
+
+  function translatePage(languageName){
+    window.location = `#googtrans(en|${languageName})`;
+    location.reload();
+
+    setTimeout(hideGoogleBar, 3000);
+
+  }
+
+  function hideGoogleBar(){
+    // hide ugly google translate top bar
+    document.getElementsByTagName("iframe")[0].style.visibility = "hidden";
+
+    alert("hi");
+  }
+
+
+  function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+      pageLanguage: 'en'
+    },
+    'google_translate_element'
+  );
+  }
     
 
   </script>
+
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 
 

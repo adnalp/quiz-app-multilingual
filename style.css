@@ -18,6 +18,9 @@ body {
   padding: 20px;
   width: 400px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+
+  position: relative;
+
 }
 
 .heading {
@@ -161,7 +164,7 @@ body {
   background-color: #005c99;
 }
 
-.points-container{
+.points-container, .language-selection{
   position: absolute;
   top : 0;
   right: 0;
@@ -175,11 +178,24 @@ body {
   color: #fff;
 
   background: rgba(255,255,255, 0.2);
+
   border-top-right-radius: inherit;
   border-bottom-left-radius: inherit;
 
   padding-block: 8px;
   padding-inline: 16px;
+
+  z-index: 5;
+}
+
+.language-selection{
+  background: rgba(0,0,0, 0.5);
+}
+
+.language-selection > span{
+  cursor: pointer;
+  line-height: 2em;
+  font-weight: initial;
 }
 
 .shake-animation {
@@ -237,4 +253,9 @@ body {
 @keyframes growProgressBar {
   0%, 33% { --pgPercentage: 0; }
   100% { --pgPercentage: var(--value); }
+}
+
+.progress-details {
+  color: #fff;
+  margin-bottom: 20px;
 }
