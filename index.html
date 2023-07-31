@@ -1,12 +1,203 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz App (Multilingual)</title>
+    
+  <link rel="stylesheet" href="style.css">
+
 </head>
 <body>
-    <h1>hello world</h1>
-    <p>by adnan</p>
+
+
+  <div class="container">
+    <div class="heading">Quiz App</div>
+
+    <div id="start-container">
+      <p class="quiz-app-description">
+        Welcome to my multilingual quiz app. Test your knowledge in various languages!
+      </p>
+
+      <button onclick="loadQuestions()" type="button" class="button button-secondary">Start Game</button>
+
+    </div>
+   
+
+
+    <div class="question-container" id="question-container">
+
+      <div class="points-container">
+        <img src="gold-medal-icon.svg" alt="Points" height="30px">
+        &nbsp;&nbsp;&nbsp;
+        <span id="points-count">0</span>
+      </div>
+
+      <div class="question">Question <span id="question-counter">1</span>:</div>
+      <div class="question-text" id="question-text">What is the capital of France?</div>
+      <div class="choices" id="choices">
+        <label class="choice"><input type="radio" name="question" value="paris">Paris</label>
+        <label class="choice"><input type="radio" name="question" value="london">London</label>
+        <label class="choice"><input type="radio" name="question" value="berlin">Berlin</label>
+      </div>
+      <button class="submit-button" type="button" onclick="findSelection()">Submit Answer</button>
+    </div>
+
+    <div id="result-container" style="display: none;">
+      <p class="quiz-app-description">
+        Quiz completed! Here is the result of your knowledge 😉
+      </p>
+
+      <div id="progressbar" aria-valuemin="0" aria-valuemax="100" style="--value:10"></div>
+
+      <button onclick="location.reload()" type="button" class="button button-secondary">Play Again</button>
+
+    </div>
+
+
+  </div>
+
+  
+
+
+
+  <script>
+      points = 0;
+      currentQuestion = -1;
+      questionsAmount = 10;
+      questions = [];
+
+  function goToNextQuestion(){
+    if (currentQuestion < ( questionsAmount - 1) ) {
+      currentQuestion++;
+
+      document.getElementById("question-counter").innerText = `${currentQuestion + 1}/${questionsAmount}`;
+      document.getElementById("question-text").innerHTML = questions[currentQuestion]["question"];
+
+      allAnswers = questions[currentQuestion]["incorrect_answers"] ;
+      allAnswers.push(questions[currentQuestion]["correct_answer"])
+      shuffleArray(allAnswers);
+
+      choicesHtml = "";
+      for(var i = 0, length = allAnswers.length; i < length; i++){
+        choicesHtml += `<label class="choice"><input type="radio" name="question" value="${i}">${allAnswers[i]}</label>`;
+      }
+      document.getElementById("choices").innerHTML = choicesHtml;
+
+    }
+    else{
+      showResult();
+    }
+    
+
+  }
+
+  function showResult(){
+    document.getElementById("question-container").style.display = "none";
+    document.getElementById("result-container").style.display = "block";
+    document.getElementById("progressbar").style=`--value:${(points/questionsAmount)*100}`;
+  }
+
+
+  function checkAnswer(userAnswer){
+    if( userAnswer === questions[currentQuestion]["correct_answer"] ){
+      points++;
+      document.getElementById("points-count").style.color="#009933";
+    }
+    else{
+      document.getElementById("points-count").style.color="red";
+    }
+
+    document.getElementById("points-count").innerText = points;
+    startShakeAnimation();
+  }
+
+  function startShakeAnimation() {
+    const pointsCountElement = document.getElementById("points-count");
+    pointsCountElement.classList.add("shake-animation");
+
+    // Remove the shake class after the animation completes
+    pointsCountElement.addEventListener("animationend", () => {
+      pointsCountElement.classList.remove("shake-animation");
+    });
+}
+
+
+
+  /* Randomize array in-place using Durstenfeld shuffle algorithm */
+  function shuffleArray(array) {
+      for (var i = array.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var temp = array[i];
+          array[i] = array[j];
+          array[j] = temp;
+      };
+  }
+  
+
+
+  function loadQuestions(){
+      // URL of the external JSON file
+      const jsonURL = "https://opentdb.com/api.php?amount=10&category=27&difficulty=easy&type=multiple";
+
+      // Fetch JSON data from the external URL
+      fetch(jsonURL)
+          .then(response => {
+          // Check if the request was successful (status code 200)
+          if (!response.ok) {
+              throw new Error("Network response was not ok");
+          }
+          return response.json();
+          })
+          .then(data => {
+          // Display JSON data on the webpage
+          console.log("fetch succesful");
+          questions = data["results"];
+
+          document.getElementById("start-container").style.display = "none";
+          document.getElementById("question-container").style.display = "block";
+          goToNextQuestion();
+
+
+          })
+          .catch(error => {
+          // Handle any errors that occurred during the fetch
+          console.error("Error fetching data:", error);
+
+          showLoadAgain();
+
+
+          });
+  }
+  
+
+
+
+  
+  function findSelection(){
+      var radios = document.getElementsByName('question');
+
+      for (var i = 0, length = radios.length; i < length; i++) {
+      if (radios[i].checked) {
+          // do whatever you want with the checked radio
+          checkAnswer(radios[i].parentElement.innerText);
+          goToNextQuestion();
+
+          // only one radio can be logically checked, don't check the rest
+          break;
+      }
+      }
+  }
+
+  function showLoadAgain(){
+      document.getElementById("start-container").innerHTML += `<i style="color:red;">Error. Couldn't load data. Try again in a moment.</i><br>`;
+  }
+    
+
+  </script>
+
+
+
+
 </body>
 </html>
